@@ -16,6 +16,10 @@ import java.util.stream.Stream;
 public class PublicationReader {
 
     public Model readPublications(String filePath) throws FileNotFoundException {
+        return readPublications(filePath, Integer.MAX_VALUE);
+    }
+
+    public Model readPublications(String filePath, int maxPublications) throws FileNotFoundException {
         Publication publication = null;
         Scanner in = new Scanner(new FileInputStream(filePath));
 
@@ -130,6 +134,10 @@ public class PublicationReader {
                         publication.id = index;
                     }
                 }
+            }
+
+            if (model.existingPublications.size() >= maxPublications) {
+                break;
             }
         }
 
