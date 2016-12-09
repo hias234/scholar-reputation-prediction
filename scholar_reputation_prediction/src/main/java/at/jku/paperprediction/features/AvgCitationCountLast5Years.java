@@ -8,16 +8,16 @@ import at.jku.paperprediction.entites.Model;
  */
 public class AvgCitationCountLast5Years extends AbstractFeatureCalculator {
 
-    public AvgCitationCountLast5Years(int yearToPredict) {
-        super("AvgCitationCountLast5Years", yearToPredict);
+    public AvgCitationCountLast5Years(int yearToPredict, int yearsToPredictBack) {
+        super("AvgCitationCountLast5Years", yearToPredict, yearsToPredictBack);
     }
 
     @Override
     protected Double getFeatureOfAuthor(Author author, Model model) {
-        int year = yearToPredict - 10;
+        int year = yearToPredict - yearsToPredictBack - 5;
         double avgCitationCount = 0.0;
 
-        for (; year <= yearToPredict - 5; year++) {
+        for (; year <= yearToPredict - yearsToPredictBack; year++) {
             Integer citationCount = author.citationsPerYear.get(year);
             if (citationCount == null) {
                 citationCount = 0;

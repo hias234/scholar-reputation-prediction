@@ -2,13 +2,13 @@ package at.jku.paperprediction.io;
 
 import at.jku.paperprediction.entites.Author;
 import at.jku.paperprediction.entites.Model;
-import at.jku.paperprediction.features.AvgCitationCountLast5Years;
-import at.jku.paperprediction.features.FeatureCalculator;
+import at.jku.paperprediction.features.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -19,9 +19,19 @@ import java.util.stream.Collectors;
  */
 public class ArffFileWriter {
 
-    public void computeAndWriteArffFile(String path, Model model, int yearToPredict) {
+    public void computeAndWriteArffFile(String path, Model model, int yearToPredict, int yearsPredictBack) {
+
         // compute features
-        List<FeatureCalculator> featureCalculators = Arrays.asList(new AvgCitationCountLast5Years(yearToPredict));
+        List<FeatureCalculator> featureCalculators = new ArrayList<>(Arrays.asList(
+                new AvgCitationCountLast5Years(yearToPredict, yearsPredictBack)
+        ));
+
+        for (int year = yearToPredict - yearsPredictBack - 5; year <= yearToPredict - yearsPredictBack; year++) {
+            featureCalculators.add(new CitationCount(year));
+            featureCalculators.add(new HIndex(year));
+            featureCalculators.add(new PublicationCount(year));
+        }
+
         for (FeatureCalculator featureCalculator : featureCalculators) {
             model = featureCalculator.addFeature(model);
         }
@@ -45,7 +55,7 @@ public class ArffFileWriter {
             for (String featureKey : featureKeys) {
                 writer.println("@ATTRIBUTE " + featureKey + " NUMERIC");
             }
-            writer.println("@ATTRIBUTE hIndex NUMERIC");
+            writer.println("@ATTRIBUTE hIndexDiff NUMERIC");
             writer.println();
 
             writer.println("@DATA");
@@ -55,11 +65,9 @@ public class ArffFileWriter {
                     writer.write(author.features.get(featureKey).toString());
                     writer.write(",");
                 }
-                Integer hIndex = author.hIndexForYear.get(yearToPredict);
-                if (hIndex == null) {
-                    hIndex = -1;
-                }
-                writer.write(hIndex.toString());
+                Integer hIndex = getHIndex(yearToPredict, author);
+                Integer hIndex5YearsAgo = getHIndex(yearToPredict - yearsPredictBack, author);
+                writer.write(Integer.toString(hIndex - hIndex5YearsAgo));
                 writer.println();
             }
         } catch (IOException e) {
@@ -70,6 +78,14 @@ public class ArffFileWriter {
                 writer.close();
             }
         }
+    }
+
+    private Integer getHIndex(int year, Author author) {
+        Integer hIndex = author.hIndexForYear.get(year);
+        if (hIndex == null) {
+            hIndex = -1;
+        }
+        return hIndex;
     }
 
 }

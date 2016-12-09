@@ -39,10 +39,10 @@ public class Main {
 
         model = calculateAuthorHIndices(model, startYear, lastYear);
 
-        int yearToPredict = 2010;
-        new ArffFileWriter().computeAndWriteArffFile(PATH + "features.arff", model, yearToPredict);
+        int yearToPredict = 2014;
+        new ArffFileWriter().computeAndWriteArffFile(PATH + "features.arff", model, yearToPredict, 5);
 
-        new AuthorsHIndexWriter().writeAuthorsHIndices(OUTPUT_FILE, startYear, lastYear, model.authors.values());
+        //new AuthorsHIndexWriter().writeAuthorsHIndices(OUTPUT_FILE, startYear, lastYear, model.authors.values());
 
         System.out.println("DONE");
     }
@@ -53,8 +53,7 @@ public class Main {
                 System.out.print("\rCalculating for Year " + currentYear);
                 model.authors.forEach((name, author) -> {
                     List<Integer> citationCount = new LinkedList<>();
-                    try (IntStream tracedYearStream = IntStream
-                        .rangeClosed(startYear, currentYear)) {
+                    try (IntStream tracedYearStream = IntStream.rangeClosed(startYear, currentYear)) {
                         tracedYearStream.forEach(tracedYear -> model.publicationsOfYear
                             .getOrDefault(tracedYear, Collections.emptyMap())
                             .getOrDefault(name, Collections.emptyList())

@@ -8,12 +8,18 @@ import at.jku.paperprediction.entites.Model;
  */
 public abstract class AbstractFeatureCalculator implements FeatureCalculator {
 
-    protected int yearToPredict;
-    protected String featureKey;
+    protected Integer yearToPredict;
+    protected Integer yearsToPredictBack;
+    protected final String featureKey;
 
-    public AbstractFeatureCalculator(String featureKey, int yearToPredict) {
+    public AbstractFeatureCalculator(String featureKey) {
+        this.featureKey = featureKey;
+    }
+
+    public AbstractFeatureCalculator(String featureKey, int yearToPredict, int yearsToPredictBack) {
         this.featureKey = featureKey;
         this.yearToPredict = yearToPredict;
+        this.yearsToPredictBack = yearsToPredictBack;
     }
 
     @Override
