@@ -53,9 +53,9 @@ public class PublicationReader {
                                 .computeIfAbsent(publication.year, year -> new HashMap<>());
                         final Publication currentPublication = publication;
                         publication.authorList.forEach(author -> {
-//                            List<Publication> publicationsOfAuthor = publicationsOfAuthors
-//                                    .computeIfAbsent(author.name, name -> new LinkedList<>());
-//                            publicationsOfAuthor.add(currentPublication);
+                            List<Publication> publicationsOfAuthor = publicationsOfAuthors
+                                    .computeIfAbsent(author.name, name -> new LinkedList<>());
+                            publicationsOfAuthor.add(currentPublication);
                             author.addPublication(currentPublication);
                         });
                         model.existingPublications.put(publication.id, publication);
@@ -149,6 +149,16 @@ public class PublicationReader {
                     publicationsOfAuthors.computeIfAbsent(author.name, name -> new LinkedList<>());
             publicationsOfAuthor.add(currentPublication);
         });
+
+        // compute citation counts
+        for (Publication pub : model.existingPublications.values()) {
+            for (Publication reference : pub.references) {
+                for (Author author : pub.authorList) {
+                    author.addCitation(reference);
+                }
+            }
+        }
+
         System.out.println();
         System.out.println(
                 "found " + model.existingPublications.size() + " publications with " + model.duplicationCounter

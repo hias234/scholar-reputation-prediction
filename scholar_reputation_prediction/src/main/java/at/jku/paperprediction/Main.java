@@ -2,6 +2,9 @@ package at.jku.paperprediction;
 
 import at.jku.paperprediction.entites.Model;
 import at.jku.paperprediction.entites.Publication;
+import at.jku.paperprediction.features.AvgCitationCountLast5Years;
+import at.jku.paperprediction.features.FeatureCalculator;
+import at.jku.paperprediction.io.ArffFileWriter;
 import at.jku.paperprediction.io.AuthorsHIndexWriter;
 import at.jku.paperprediction.io.PublicationReader;
 
@@ -21,7 +24,7 @@ public class Main {
 
     public static void main(final String[] args) throws Exception {
 
-        Model model = new PublicationReader().readPublications(INPUT_FILE);
+        Model model = new PublicationReader().readPublications(INPUT_FILE, 100000);
 
         System.out.println("DONE READING FILE - calling GC");
         System.gc();
@@ -35,12 +38,16 @@ public class Main {
         int lastYear = sortedYears.get(sortedYears.size() - 1);
 
         model = calculateAuthorHIndices(model, startYear, lastYear);
+
+        int yearToPredict = 2010;
+        new ArffFileWriter().computeAndWriteArffFile(PATH + "features.arff", model, yearToPredict);
+
         new AuthorsHIndexWriter().writeAuthorsHIndices(OUTPUT_FILE, startYear, lastYear, model.authors.values());
 
         System.out.println("DONE");
     }
 
-    private static Model calculateAuthorHIndices(Model model, int startYear, int lastYear) {
+    private static Model calculateAuthorHIndices(final Model model, int startYear, int lastYear) {
         try (IntStream currentYearStream = IntStream.rangeClosed(startYear, lastYear)) {
             currentYearStream.forEach(currentYear -> {
                 System.out.print("\rCalculating for Year " + currentYear);
@@ -72,6 +79,7 @@ public class Main {
                             }
                         }
                     }
+
                     author.hIndexForYear.put(currentYear, hIndex);
                 });
             });

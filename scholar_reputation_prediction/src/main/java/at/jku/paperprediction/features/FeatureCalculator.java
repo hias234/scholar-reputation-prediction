@@ -13,6 +13,7 @@ public interface FeatureCalculator {
     /**
      * add a specific feature to the model
      */
-    Model createFeatures(Model model);
+    Model addFeature(Model model);
 
+    String getFeatureKey();
 }

@@ -7,6 +7,7 @@ public class Author {
     public String name;
     public Map<Integer, Integer> hIndexForYear = new HashMap<>();
     public Map<Integer, List<Publication>> publications = new HashMap<>();
+    public Map<Integer, Integer> citationsPerYear = new HashMap<>();
     public Map<String, Double> features = new HashMap<>();
 
     public Author() {}
@@ -22,6 +23,14 @@ public class Author {
         else {
             publications.put(publication.year, new ArrayList<>(Arrays.asList(publication)));
         }
+    }
+
+    public void addCitation(Publication citation) {
+        Integer curCitationsPerYear = citationsPerYear.get(citation.year);
+        if (curCitationsPerYear == null) {
+            curCitationsPerYear = 0;
+        }
+        citationsPerYear.put(citation.year, curCitationsPerYear + 1);
     }
 
     @Override
