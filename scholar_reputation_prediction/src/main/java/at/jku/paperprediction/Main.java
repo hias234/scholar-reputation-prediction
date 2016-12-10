@@ -5,6 +5,7 @@ import at.jku.paperprediction.entites.Publication;
 import at.jku.paperprediction.features.AvgCitationCountLast5Years;
 import at.jku.paperprediction.features.FeatureCalculator;
 import at.jku.paperprediction.io.ArffFileWriter;
+import at.jku.paperprediction.io.AuthorsHIndexReader;
 import at.jku.paperprediction.io.AuthorsHIndexWriter;
 import at.jku.paperprediction.io.PublicationReader;
 
@@ -24,7 +25,7 @@ public class Main {
 
     public static void main(final String[] args) throws Exception {
 
-        Model model = new PublicationReader().readPublications(INPUT_FILE, 100000);
+        Model model = new PublicationReader().readPublications(INPUT_FILE);
 
         System.out.println("DONE READING FILE - calling GC");
         System.gc();
@@ -37,7 +38,8 @@ public class Main {
         int startYear = sortedYears.get(0);
         int lastYear = sortedYears.get(sortedYears.size() - 1);
 
-        model = calculateAuthorHIndices(model, startYear, lastYear);
+        //model = calculateAuthorHIndices(model, startYear, lastYear);
+        model = new AuthorsHIndexReader().readAuthorsHIndices(PATH + "authors_hindex_acm_v8.csv", model);
 
         int yearToPredict = 2014;
         new ArffFileWriter().computeAndWriteArffFile(PATH + "features.arff", model, yearToPredict, 5);
