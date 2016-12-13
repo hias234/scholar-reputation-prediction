@@ -23,7 +23,13 @@ public class ArffFileWriter {
 
         // compute features
         List<FeatureCalculator> featureCalculators = new ArrayList<>(Arrays.asList(
-                new AvgCitationCountLast5Years(yearToPredict, yearsPredictBack)
+                new AvgCitationCountLast5Years(yearToPredict, yearsPredictBack),
+                new CareerLength(yearToPredict, yearsPredictBack),
+                new PublicationCountUntilYear(yearToPredict, yearsPredictBack),
+                new CitationCountUntilYear(yearToPredict, yearsPredictBack),
+                new AvgPublicationsPerYear(yearToPredict, yearsPredictBack),
+                new AvgCitationsPerYear(yearToPredict, yearsPredictBack),
+                new AvgCitationsPerPaper(yearToPredict, yearsPredictBack)
         ));
 
         for (int year = yearToPredict - yearsPredictBack - 5; year <= yearToPredict - yearsPredictBack; year++) {
@@ -33,10 +39,14 @@ public class ArffFileWriter {
         }
 
         for (FeatureCalculator featureCalculator : featureCalculators) {
+            System.out.println("calculating feature " + featureCalculator.getFeatureKey());
             model = featureCalculator.addFeature(model);
         }
+        System.out.println("Calculating features ... DONE");
 
         List<String> featureKeys = featureCalculators.stream().map(FeatureCalculator::getFeatureKey).collect(Collectors.toList());
+
+        int count = 0;
 
         // write features
         PrintWriter writer = null;
@@ -69,6 +79,11 @@ public class ArffFileWriter {
                 Integer hIndex5YearsAgo = getHIndex(yearToPredict - yearsPredictBack, author);
                 writer.write(Integer.toString(hIndex - hIndex5YearsAgo));
                 writer.println();
+
+                if (count % 1000 == 0) {
+                    writer.flush();
+                }
+                count++;
             }
         } catch (IOException e) {
             e.printStackTrace();

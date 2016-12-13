@@ -2,6 +2,9 @@ package at.jku.paperprediction.features;
 
 import at.jku.paperprediction.entites.Author;
 import at.jku.paperprediction.entites.Model;
+import at.jku.paperprediction.entites.Publication;
+
+import java.util.List;
 
 /**
  * Created by marku on 09.12.2016.

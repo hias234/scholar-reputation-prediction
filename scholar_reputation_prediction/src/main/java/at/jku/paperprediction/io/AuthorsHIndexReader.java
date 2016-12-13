@@ -24,11 +24,12 @@ public class AuthorsHIndexReader {
         Stream<String> headerStream = Arrays.stream(firstLine.split(",")).map(String::trim).skip(1);
         List<Integer> years = headerStream.map(Integer::parseInt).collect(Collectors.toList());
 
+        int count = 0;
         while (in.hasNextLine()) {
             String line = in.nextLine();
 
             String[] parts = line.split(",");
-            String authorName = Arrays.stream(parts).findFirst().get();
+            String authorName = parts[0];
             List<Integer> hIndices = Arrays.stream(parts).skip(1).map(Integer::parseInt).collect(Collectors.toList());
 
             Author author = model.authors.get(authorName);
@@ -41,6 +42,11 @@ public class AuthorsHIndexReader {
             else {
                 System.out.println("author not found");
             }
+
+            if (count % 10000 == 0) {
+                System.out.println(count + " authors read\r");
+            }
+            count++;
         }
 
         return model;
