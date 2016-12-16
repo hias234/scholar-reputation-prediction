@@ -8,8 +8,10 @@ import at.jku.paperprediction.entites.Model;
  */
 public class CareerLength extends AbstractFeatureCalculator {
 
+    public static final String FEATURE_KEY = "CareerLength";
+
     public CareerLength(int yearToPredict, int yearsToPredictBack) {
-        super("CareerLength", yearToPredict, yearsToPredictBack);
+        super(FEATURE_KEY, yearToPredict, yearsToPredictBack);
     }
 
     @Override

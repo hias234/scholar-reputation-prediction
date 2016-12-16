@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  */
 public class ArffFileWriter {
 
-    public void computeAndWriteArffFile(String path, Model model, int yearToPredict, int yearsPredictBack) {
+    public void computeAndWriteArffFile(String path, String path_classification, Model model, int yearToPredict, int yearsPredictBack) {
 
         // compute features
         List<FeatureCalculator> featureCalculators = new ArrayList<>(Arrays.asList(
@@ -50,38 +50,46 @@ public class ArffFileWriter {
 
         // write features
         PrintWriter writer = null;
+        PrintWriter writerClassification = null;
         try {
             File file = new File(path);
             file.createNewFile();
-
             writer = new PrintWriter(file);
-            writer.println("% Group A");
-            writer.println("% Date: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-            writer.println();
 
-            writer.println("@RELATION sysdev");
-            writer.println();
+            File fileClassification = new File(path_classification);
+            fileClassification.createNewFile();
+            writerClassification = new PrintWriter(fileClassification);
 
-            for (String featureKey : featureKeys) {
-                writer.println("@ATTRIBUTE " + featureKey + " NUMERIC");
-            }
+            writeAttributes(featureKeys, writer);
+            writeAttributes(featureKeys, writerClassification);
+
             writer.println("@ATTRIBUTE hIndexDiff NUMERIC");
             writer.println();
 
-            writer.println("@DATA");
-
-            for (Author author : model.authors.values()) {
-                for (String featureKey : featureKeys) {
-                    writer.write(author.features.get(featureKey).toString());
-                    writer.write(",");
+            writerClassification.print("@ATTRIBUTE hIndexDiff {");
+            for (int i = 0; i < 100; i++) {
+                if (i > 0) {
+                    writerClassification.print(",");
                 }
-                Integer hIndex = getHIndex(yearToPredict, author);
-                Integer hIndex5YearsAgo = getHIndex(yearToPredict - yearsPredictBack, author);
-                writer.write(Integer.toString(hIndex - hIndex5YearsAgo));
-                writer.println();
+                writerClassification.print(i);
+            }
+            writerClassification.println("}");
+            writerClassification.println();
+
+            writer.println("@DATA");
+            writerClassification.println("@DATA");
+
+            // write for every authors which already have published before the last year where the h-index is known
+            for (Author author : model.authors.values().stream()
+                    .filter(a -> a.features.get(CareerLength.FEATURE_KEY) > 1 && a.features.get(CareerLength.FEATURE_KEY) < 100)
+                    .collect(Collectors.toList())) {
+
+                writeDataLine(yearToPredict, yearsPredictBack, featureKeys, writer, author);
+                writeDataLine(yearToPredict, yearsPredictBack, featureKeys, writerClassification, author);
 
                 if (count % 1000 == 0) {
                     writer.flush();
+                    writerClassification.flush();
                 }
                 count++;
             }
@@ -92,6 +100,33 @@ public class ArffFileWriter {
             if (writer != null) {
                 writer.close();
             }
+            if (writerClassification != null) {
+                writerClassification.close();
+            }
+        }
+    }
+
+    private void writeDataLine(int yearToPredict, int yearsPredictBack, List<String> featureKeys, PrintWriter writer, Author author) {
+        for (String featureKey : featureKeys) {
+            writer.write(author.features.get(featureKey).toString());
+            writer.write(",");
+        }
+        Integer hIndex = getHIndex(yearToPredict, author);
+        Integer hIndex5YearsAgo = getHIndex(yearToPredict - yearsPredictBack, author);
+        writer.write(Integer.toString(hIndex - hIndex5YearsAgo));
+        writer.println();
+    }
+
+    private void writeAttributes(List<String> featureKeys, PrintWriter writer) {
+        writer.println("% Group A");
+        writer.println("% Date: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+        writer.println();
+
+        writer.println("@RELATION sysdev");
+        writer.println();
+
+        for (String featureKey : featureKeys) {
+            writer.println("@ATTRIBUTE " + featureKey + " NUMERIC");
         }
     }
 

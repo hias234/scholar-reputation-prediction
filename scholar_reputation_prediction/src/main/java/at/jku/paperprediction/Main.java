@@ -42,7 +42,7 @@ public class Main {
         model = new AuthorsHIndexReader().readAuthorsHIndices(PATH + "authors_hindex_acm_v8.csv", model);
 
         int yearToPredict = 2014;
-        new ArffFileWriter().computeAndWriteArffFile(PATH + "features.arff", model, yearToPredict, 5);
+        new ArffFileWriter().computeAndWriteArffFile(PATH + "features.arff", PATH + "features_classification.arff", model, yearToPredict, 5);
 
         //new AuthorsHIndexWriter().writeAuthorsHIndices(OUTPUT_FILE, startYear, lastYear, model.authors.values());
 
