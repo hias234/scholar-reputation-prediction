@@ -29,10 +29,11 @@ public class ArffFileWriter {
                 new CitationCountUntilYear(yearToPredict, yearsPredictBack),
                 new AvgPublicationsPerYear(yearToPredict, yearsPredictBack),
                 new AvgCitationsPerYear(yearToPredict, yearsPredictBack),
-                new AvgCitationsPerPaper(yearToPredict, yearsPredictBack)
+                new AvgCitationsPerPaper(yearToPredict, yearsPredictBack),
+                new LastPublicationXYearsAgo(yearToPredict, yearsPredictBack)
         ));
 
-        for (int year = yearToPredict - yearsPredictBack - 5; year <= yearToPredict - yearsPredictBack; year++) {
+        for (int year = yearToPredict - yearsPredictBack - 4; year <= yearToPredict - yearsPredictBack; year++) {
             featureCalculators.add(new CitationCount(year));
             featureCalculators.add(new HIndex(year));
             featureCalculators.add(new PublicationCount(year));
@@ -67,7 +68,7 @@ public class ArffFileWriter {
             writer.println();
 
             writerClassification.print("@ATTRIBUTE hIndexDiff {");
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 50; i++) {
                 if (i > 0) {
                     writerClassification.print(",");
                 }
@@ -80,9 +81,7 @@ public class ArffFileWriter {
             writerClassification.println("@DATA");
 
             // write for every authors which already have published before the last year where the h-index is known
-            for (Author author : model.authors.values().stream()
-                    .filter(a -> a.features.get(CareerLength.FEATURE_KEY) > 1 && a.features.get(CareerLength.FEATURE_KEY) < 100)
-                    .collect(Collectors.toList())) {
+            for (Author author : getRelevantAuthors(model)) {
 
                 writeDataLine(yearToPredict, yearsPredictBack, featureKeys, writer, author);
                 writeDataLine(yearToPredict, yearsPredictBack, featureKeys, writerClassification, author);
@@ -104,6 +103,18 @@ public class ArffFileWriter {
                 writerClassification.close();
             }
         }
+    }
+
+    /**
+     * only write authors to features file, which have a positive career length and did publish in the last 10 years
+     * @param model
+     * @return
+     */
+    private List<Author> getRelevantAuthors(Model model) {
+        return model.authors.values().stream()
+                .filter(a -> a.features.get(CareerLength.FEATURE_KEY) > 1 && a.features.get(CareerLength.FEATURE_KEY) < 100)
+                .filter(a -> a.features.get(LastPublicationXYearsAgo.FEATURE_KEY) < 10)
+                .collect(Collectors.toList());
     }
 
     private void writeDataLine(int yearToPredict, int yearsPredictBack, List<String> featureKeys, PrintWriter writer, Author author) {
