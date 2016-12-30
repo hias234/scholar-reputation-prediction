@@ -4,10 +4,7 @@ import at.jku.paperprediction.entites.Model;
 import at.jku.paperprediction.entites.Publication;
 import at.jku.paperprediction.features.AvgCitationCountLast5Years;
 import at.jku.paperprediction.features.FeatureCalculator;
-import at.jku.paperprediction.io.ArffFileWriter;
-import at.jku.paperprediction.io.AuthorsHIndexReader;
-import at.jku.paperprediction.io.AuthorsHIndexWriter;
-import at.jku.paperprediction.io.PublicationReader;
+import at.jku.paperprediction.io.*;
 
 import javax.xml.ws.Holder;
 import java.io.FileWriter;
@@ -31,14 +28,15 @@ public class Main {
         System.gc();
         System.out.println("DONE GC - STARTING WITH THE PROCESSING");
 
-        List<Integer> sortedYears =
-                model.publicationsOfYear.keySet().stream().filter(year -> year > 0).sorted(Integer::compareTo)
-                .collect(Collectors.toList());
+//        List<Integer> sortedYears =
+//                model.publicationsOfYear.keySet().stream().filter(year -> year > 0).sorted(Integer::compareTo)
+//                .collect(Collectors.toList());
 
-        int startYear = sortedYears.get(0);
-        int lastYear = sortedYears.get(sortedYears.size() - 1);
+//        int startYear = sortedYears.get(0);
+//        int lastYear = sortedYears.get(sortedYears.size() - 1);
 
         //model = calculateAuthorHIndices(model, startYear, lastYear);
+        model = new JounalRankReader().readJounalRanks(PATH + "publication_jouranlrank.csv", model);
         model = new AuthorsHIndexReader().readAuthorsHIndices(PATH + "authors_hindex_acm_v8.csv", model);
 
         int yearToPredict = 2014;

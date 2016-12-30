@@ -30,10 +30,14 @@ public class ArffFileWriter {
                 new AvgPublicationsPerYear(yearToPredict, yearsPredictBack),
                 new AvgCitationsPerYear(yearToPredict, yearsPredictBack),
                 new AvgCitationsPerPaper(yearToPredict, yearsPredictBack),
-                new LastPublicationXYearsAgo(yearToPredict, yearsPredictBack)
+                new LastPublicationXYearsAgo(yearToPredict, yearsPredictBack),
+                new AvgPublicationJournalRank(yearToPredict, yearsPredictBack, 5),
+                new AvgPublicationJournalRank(yearToPredict, yearsPredictBack, 10),
+                new AvgPublicationJournalRank(yearToPredict, yearsPredictBack, 20),
+                new AvgPublicationJournalRank(yearToPredict, yearsPredictBack, 100)
         ));
 
-        for (int year = yearToPredict - yearsPredictBack - 4; year <= yearToPredict - yearsPredictBack; year++) {
+        for (int year = yearToPredict - yearsPredictBack - 2; year <= yearToPredict - yearsPredictBack; year++) {
             featureCalculators.add(new CitationCount(year));
             featureCalculators.add(new HIndex(year));
             featureCalculators.add(new PublicationCount(year));
@@ -114,6 +118,7 @@ public class ArffFileWriter {
         return model.authors.values().stream()
                 .filter(a -> a.features.get(CareerLength.FEATURE_KEY) > 1 && a.features.get(CareerLength.FEATURE_KEY) < 100)
                 .filter(a -> a.features.get(LastPublicationXYearsAgo.FEATURE_KEY) < 10)
+                .filter(a -> a.features.get(AvgPublicationJournalRank.FEATURE_KEY + "100") != 1.0)
                 .collect(Collectors.toList());
     }
 

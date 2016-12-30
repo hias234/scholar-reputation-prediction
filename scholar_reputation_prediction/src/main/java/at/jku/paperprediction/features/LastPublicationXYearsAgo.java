@@ -24,7 +24,7 @@ public class LastPublicationXYearsAgo extends AbstractFeatureCalculator {
 
         int yearLastPublication = author.publications.keySet().stream().mapToInt(p -> p)
                 .filter(p -> p <= yearToPredict - yearsToPredictBack)
-                .max().orElseGet(() -> 1900);
+                .max().orElseGet(() -> Integer.MIN_VALUE);
 
         return (double) (yearToPredict - yearsToPredictBack - yearLastPublication);
     }

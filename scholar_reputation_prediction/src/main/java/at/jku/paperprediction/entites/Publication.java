@@ -11,6 +11,7 @@ public class Publication {
     public String title;
     public String venue;
     public boolean present;
+    public Double journalRank = -1.;
 
     public java.util.Set<Author> authorList;
 
