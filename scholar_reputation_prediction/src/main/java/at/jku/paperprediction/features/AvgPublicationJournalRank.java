@@ -35,7 +35,7 @@ public class AvgPublicationJournalRank extends AbstractFeatureCalculator {
         int cnt = 0;
 
         for (Publication p : authorPublications) {
-            if (p.journalRank != -1) {
+            if (!p.journalRank.equals(-1.0)) {
                 avgRank += p.journalRank;
                 cnt++;
             }
